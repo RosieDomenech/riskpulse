@@ -17,6 +17,29 @@ Most cybersecurity tools are built for enterprises. They're complex, expensive, 
 
 ---
 
+## How Is This Different From Antivirus?
+
+This is the most common question — and the most important one to understand.
+
+| | Antivirus | SecureCheck |
+|---|---|---|
+| **Scope** | One device | All your devices + accounts |
+| **What it monitors** | Files & malware | Posture, identity & exposure |
+| **Question it answers** | "Is this file safe?" | "Am I safe — right now?" |
+| **Approach** | Reactive | Proactive |
+| **Examples** | Norton, McAfee, Malwarebytes | ← This app |
+
+**The simplest analogy:**
+- 🔒 **Antivirus** = a lock on your front door
+- 📷 **SecureCheck** = a security camera system showing every door, window, and who's been in your driveway
+
+They are **complementary, not competing.** Most people already have antivirus. Almost nobody has a personal security posture dashboard. That's the gap SecureCheck fills.
+
+> Antivirus asks: *"Is this file dangerous?"*
+> SecureCheck asks: *"Is my entire digital life exposed?"*
+
+---
+
 ## How It Works
 
 SecureCheck uses **3 lightweight detection methods** — no agents, no network scanners, no special permissions required:
