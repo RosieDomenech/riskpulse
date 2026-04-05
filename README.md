@@ -11,7 +11,7 @@
 
 ## What Is SecureCheck?
 
-SecureCheck is a **Personal Security Posture Dashboard** — a free Progressive Web App (PWA) that gives individuals and small organizations a simple, at-a-glance view of their security health.
+SecureCheck is a **Personal Security Posture Dashboard** -a free Progressive Web App (PWA) that gives individuals and small organizations a simple, at-a-glance view of their security health.
 
 Most cybersecurity tools are built for enterprises. They're complex, expensive, and overwhelming. SecureCheck is different: it's designed for **real people** who just want to know if they're exposed — without needing a security team to interpret the results.
 
