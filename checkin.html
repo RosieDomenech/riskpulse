@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>SecureCheck — Device Check-In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0a0a0f;
+      --surface: #12121a;
+      --border:  #2a2a3a;
+      --accent:  #00ff88;
+      --accent2: #0088ff;
+      --warn:    #ffaa00;
+      --danger:  #ff3355;
+      --text:    #e8e8f0;
+      --mono:    'Space Mono', monospace;
+      --sans:    'DM Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+    .card {
+      position: relative;
+      background: #12121a;
+      border: 1px solid #2a2a3a;
+      border-radius: 24px;
+      padding: 36px 28px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .shield {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .title {
+      font-family: var(--mono);
+      font-size: 20px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .sub {
+      font-size: 14px;
+      color: #555570;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .device-preview {
+      background: #1a1a26;
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .preview-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #444460;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #1e1e2e;
+      font-size: 13px;
+    }
+    .preview-row:last-child { border-bottom: none; }
+    .preview-key { color: #555570; }
+    .preview-val { color: var(--text); font-weight: 500; font-family: var(--mono); font-size: 12px; }
+    .preview-val.ok { color: var(--accent); }
+    .name-input {
+      width: 100%;
+      background: #1a1a26;
+      border: 1px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 12px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .name-input:focus { border-color: var(--accent2); }
+    .name-input::placeholder { color: #333350; }
+    .btn {
+      width: 100%;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn.secondary {
+      background: transparent;
+      border: 1px solid #2a2a3a;
+      color: var(--text);
+      margin-top: 10px;
+    }
+    .success {
+      display: none;
+      text-align: center;
+    }
+    .success-icon { font-size: 56px; margin-bottom: 16px; }
+    .success-title {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .success-sub { font-size: 13px; color: #555570; line-height: 1.6; }
+    .owner-badge {
+      display: inline-block;
+      background: rgba(0,136,255,0.1);
+      border: 1px solid rgba(0,136,255,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--accent2);
+      margin-bottom: 24px;
+      font-family: var(--mono);
+    }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(10,10,15,0.3);
+      border-top-color: var(--bg);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card { animation: fadeIn 0.4s ease; }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Check-in form -->
+  <div id="formView">
+    <span class="shield">🛡️</span>
+    <div class="title">Device Check-In</div>
+    <div id="ownerBadge" class="owner-badge">Loading...</div>
+    <div class="sub">This will register your device with SecureCheck and update your security posture score.</div>
+
+    <!-- Auto-detected device info -->
+    <div class="device-preview">
+      <div class="preview-label">Detected Device Info</div>
+      <div class="preview-row">
+        <span class="preview-key">Device</span>
+        <span class="preview-val ok" id="detectedDevice">Detecting...</span>
+      </div>
+      <div class="preview-row">
+        <span class="preview-key">OS</span>
+        <span class="preview-val ok" id="detectedOS">Detecting...</span>
+      </div>
+      <div class="preview-row">
+        <span class="preview-key">Browser</span>
+        <span class="preview-val" id="detectedBrowser">Detecting...</span>
+      </div>
+      <div class="preview-row">
+        <span class="preview-key">Time</span>
+        <span class="preview-val" id="detectedTime">Now</span>
+      </div>
+    </div>
+
+    <input
+      class="name-input"
+      id="deviceName"
+      type="text"
+      placeholder="Give this device a name..."
+      maxlength="40"
+    />
+
+    <button class="btn" id="registerBtn" onclick="registerDevice()">
+      ✓ Register This Device
+    </button>
+    <button class="btn secondary" onclick="window.location='/'">
+      Cancel
+    </button>
+  </div>
+
+  <!-- Success screen -->
+  <div class="success" id="successView">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Device Registered!</div>
+    <div class="success-sub" id="successMsg"></div>
+    <br>
+    <button class="btn" style="margin-top:16px" onclick="window.location='/'">
+      Open SecureCheck
+    </button>
+  </div>
+
+</div>
+
+<script>
+// ── Detect device info from User Agent ───────────────────────
+function detectDevice() {
+  const ua = navigator.userAgent;
+  let device = 'Unknown Device';
+  let os = 'Unknown OS';
+  let browser = 'Unknown Browser';
+  let icon = '🔌';
+
+  // OS Detection
+  if (/iPhone/.test(ua)) {
+    device = 'iPhone';
+    icon = '📱';
+    const match = ua.match(/OS (\d+[_\d]*)/);
+    os = match ? 'iOS ' + match[1].replace(/_/g, '.') : 'iOS';
+  } else if (/iPad/.test(ua)) {
+    device = 'iPad';
+    icon = '📱';
+    const match = ua.match(/OS (\d+[_\d]*)/);
+    os = match ? 'iPadOS ' + match[1].replace(/_/g, '.') : 'iPadOS';
+  } else if (/Android/.test(ua)) {
+    device = 'Android Device';
+    icon = '📱';
+    const match = ua.match(/Android ([\d.]+)/);
+    os = match ? 'Android ' + match[1] : 'Android';
+  } else if (/Macintosh/.test(ua)) {
+    device = 'Mac';
+    icon = '💻';
+    const match = ua.match(/Mac OS X ([\d_]+)/);
+    os = match ? 'macOS ' + match[1].replace(/_/g, '.') : 'macOS';
+  } else if (/Windows NT/.test(ua)) {
+    device = 'Windows PC';
+    icon = '🖥️';
+    const match = ua.match(/Windows NT ([\d.]+)/);
+    const versions = { '10.0': '10/11', '6.3': '8.1', '6.2': '8', '6.1': '7' };
+    os = 'Windows ' + (versions[match?.[1]] || match?.[1] || '');
+  } else if (/Linux/.test(ua)) {
+    device = 'Linux Device';
+    icon = '🖥️';
+    os = 'Linux';
+  } else if (/CrOS/.test(ua)) {
+    device = 'Chromebook';
+    icon = '💻';
+    os = 'ChromeOS';
+  }
+
+  // Browser Detection
+  if (/CriOS/.test(ua))       browser = 'Chrome (iOS)';
+  else if (/FxiOS/.test(ua))  browser = 'Firefox (iOS)';
+  else if (/EdgiOS/.test(ua)) browser = 'Edge (iOS)';
+  else if (/Chrome/.test(ua) && !/Edge/.test(ua)) {
+    const m = ua.match(/Chrome\/([\d.]+)/);
+    browser = 'Chrome ' + (m ? m[1].split('.')[0] : '');
+  } else if (/Firefox/.test(ua)) {
+    const m = ua.match(/Firefox\/([\d.]+)/);
+    browser = 'Firefox ' + (m ? m[1].split('.')[0] : '');
+  } else if (/Safari/.test(ua) && !/Chrome/.test(ua)) {
+    const m = ua.match(/Version\/([\d.]+)/);
+    browser = 'Safari ' + (m ? m[1].split('.')[0] : '');
+  } else if (/Edg\//.test(ua)) {
+    const m = ua.match(/Edg\/([\d.]+)/);
+    browser = 'Edge ' + (m ? m[1].split('.')[0] : '');
+  }
+
+  // Suggest a name
+  const suggestedName = device === 'iPhone' || device === 'iPad' || device === 'Android Device'
+    ? device
+    : device;
+
+  return { device, os, browser, icon, suggestedName };
+}
+
+// ── Parse owner from URL param ────────────────────────────────
+function getOwner() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('owner') || 'Your SecureCheck';
+}
+
+function getToken() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('token') || null;
+}
+
+// ── Init ──────────────────────────────────────────────────────
+const info = detectDevice();
+const owner = getOwner();
+const token = getToken();
+const now = new Date();
+
+document.getElementById('detectedDevice').textContent = info.icon + ' ' + info.device;
+document.getElementById('detectedOS').textContent = info.os;
+document.getElementById('detectedBrowser').textContent = info.browser;
+document.getElementById('detectedTime').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+document.getElementById('ownerBadge').textContent = owner + "'s Dashboard";
+document.getElementById('deviceName').value = info.suggestedName;
+document.getElementById('deviceName').placeholder = 'e.g. ' + info.suggestedName;
+
+// ── Register ──────────────────────────────────────────────────
+function registerDevice() {
+  const name = document.getElementById('deviceName').value.trim() || info.suggestedName;
+  const btn = document.getElementById('registerBtn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Registering...';
+
+  // Build device record
+  const device = {
+    id:       Date.now(),
+    name:     name,
+    type:     info.icon,
+    os:       info.os,
+    browser:  info.browser,
+    lastSeen: now.toISOString(),
+    outdated: false,
+    checkedInVia: 'link',
+  };
+
+  // Save into SecureCheck localStorage
+  setTimeout(() => {
+    try {
+      const raw = localStorage.getItem('securecheck');
+      const state = raw ? JSON.parse(raw) : { devices: [], breaches: [], settings: {} };
+      // Remove duplicate by name
+      state.devices = state.devices.filter(d => d.name !== name);
+      state.devices.push(device);
+      localStorage.setItem('securecheck', JSON.stringify(state));
+    } catch(e) {}
+
+    // Show success
+    document.getElementById('formView').style.display = 'none';
+    const sv = document.getElementById('successView');
+    sv.style.display = 'block';
+    document.getElementById('successMsg').innerHTML =
+      `<strong style="color:var(--text)">${name}</strong> has been registered.<br><br>` +
+      `OS: <span style="color:var(--accent)">${info.os}</span><br>` +
+      `It will appear in your SecureCheck dashboard.`;
+  }, 800);
+}
+</script>
+</body>
+</html>
