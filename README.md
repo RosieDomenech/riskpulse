@@ -1,19 +1,19 @@
-# SecureCheck 🛡️
+# RiskPulse 🛡️
 
 **Author:** Rosie Domenech  
 **Date:** April 2026
 
 > *"Am I secure right now?"* — answered in one screen.
 
-**🌐 Live App:** [rosiedomenech.github.io/securecheck](https://rosiedomenech.github.io/securecheck)
+**🌐 Live App:** [rosiedomenech.github.io/riskpulse](https://rosiedomenech.github.io/riskpulse)
 
 ---
 
-## What Is SecureCheck?
+## What Is RiskPulse?
 
-SecureCheck is a **Personal Security Posture Dashboard** -a free Progressive Web App (PWA) that gives individuals and small organizations a simple, at-a-glance view of their security health.
+RiskPulse is a **Personal Security Posture Dashboard** -a free Progressive Web App (PWA) that gives individuals and small organizations a simple, at-a-glance view of their security health.
 
-Most cybersecurity tools are built for enterprises. They're complex, expensive, and overwhelming. SecureCheck is different: it's designed for **real people** who just want to know if they're exposed — without needing a security team to interpret the results.
+Most cybersecurity tools are built for enterprises. They're complex, expensive, and overwhelming. RiskPulse is different: it's designed for **real people** who just want to know if they're exposed — without needing a security team to interpret the results.
 
 ---
 
@@ -21,7 +21,7 @@ Most cybersecurity tools are built for enterprises. They're complex, expensive, 
 
 This is the most common question — and the most important one to understand.
 
-| | Antivirus | SecureCheck |
+| | Antivirus | RiskPulse |
 |---|---|---|
 | **Scope** | One device | All your devices + accounts |
 | **What it monitors** | Files & malware | Posture, identity & exposure |
@@ -31,18 +31,18 @@ This is the most common question — and the most important one to understand.
 
 **The simplest analogy:**
 - 🔒 **Antivirus** = a lock on your front door
-- 📷 **SecureCheck** = a security camera system showing every door, window, and who's been in your driveway
+- 📷 **RiskPulse** = a security camera system showing every door, window, and who's been in your driveway
 
-They are **complementary, not competing.** Most people already have antivirus. Almost nobody has a personal security posture dashboard. That's the gap SecureCheck fills.
+They are **complementary, not competing.** Most people already have antivirus. Almost nobody has a personal security posture dashboard. That's the gap RiskPulse fills.
 
 > Antivirus asks: *"Is this file dangerous?"*
-> SecureCheck asks: *"Is my entire digital life exposed?"*
+> RiskPulse asks: *"Is my entire digital life exposed?"*
 
 ---
 
 ## How It Works
 
-SecureCheck uses **3 lightweight detection methods** — no agents, no network scanners, no special permissions required:
+RiskPulse uses **3 lightweight detection methods** — no agents, no network scanners, no special permissions required:
 
 ### 1. 🔗 Auto Device Detection (via Check-In Link)
 Share a unique check-in link with anyone. When they tap it on their device, the browser automatically reveals:
@@ -54,7 +54,7 @@ Share a unique check-in link with anyone. When they tap it on their device, the 
 No app install needed. No permissions required. Every browser sends this information freely.
 
 ### 2. 🔍 Breach Monitoring (HaveIBeenPwned API)
-Enter any email address and SecureCheck checks it against a database of **13+ billion breached accounts** spanning hundreds of real-world data breaches including Adobe, LinkedIn, Equifax, and more.
+Enter any email address and RiskPulse checks it against a database of **13+ billion breached accounts** spanning hundreds of real-world data breaches including Adobe, LinkedIn, Equifax, and more.
 
 ### 3. 📊 Security Score (0–100)
 A real-time score calculated from your actual posture:
@@ -89,19 +89,19 @@ A real-time score calculated from your actual posture:
 
 ## Install on iPhone (PWA)
 
-1. Open **Safari** and go to [rosiedomenech.github.io/securecheck](https://rosiedomenech.github.io/securecheck)
+1. Open **Safari** and go to [rosiedomenech.github.io/riskpulse](https://rosiedomenech.github.io/riskpulse)
 2. Tap the **Share** button (box with arrow)
 3. Tap **Add to Home Screen**
 4. Tap **Add**
 
-SecureCheck now appears on your home screen with a shield icon and opens fullscreen — just like a native app, no App Store required.
+RiskPulse now appears on your home screen with a shield icon and opens fullscreen — just like a native app, no App Store required.
 
 ---
 
 ## Device Check-In Flow
 
 **For the dashboard owner:**
-1. Open SecureCheck → **Devices** tab
+1. Open RiskPulse → **Devices** tab
 2. Tap **🔗 Share Link**
 3. Copy or share the link via iMessage, WhatsApp, Email, etc.
 
@@ -157,7 +157,7 @@ By default, breach checking runs in demo mode. To enable live data:
 
 ## Privacy
 
-SecureCheck stores all data **locally in your browser**. No data is ever sent to a server, logged, or shared. The only external call made is to the HaveIBeenPwned API when you explicitly check an email address.
+RiskPulse stores all data **locally in your browser**. No data is ever sent to a server, logged, or shared. The only external call made is to the HaveIBeenPwned API when you explicitly check an email address.
 
 ---
 

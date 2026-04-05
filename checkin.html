@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>SecureCheck — Device Check-In</title>
+  <title>RiskPulse — Device Check-In</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -182,7 +182,7 @@
     <span class="shield">🛡️</span>
     <div class="title">Device Check-In</div>
     <div id="ownerBadge" class="owner-badge">Loading...</div>
-    <div class="sub">This will register your device with SecureCheck and update your security posture score.</div>
+    <div class="sub">This will register your device with RiskPulse and update your security posture score.</div>
 
     <!-- Auto-detected device info -->
     <div class="device-preview">
@@ -228,7 +228,7 @@
     <div class="success-sub" id="successMsg"></div>
     <br>
     <button class="btn" style="margin-top:16px" onclick="window.location='/'">
-      Open SecureCheck
+      Open RiskPulse
     </button>
   </div>
 
@@ -309,7 +309,7 @@ function detectDevice() {
 // ── Parse owner from URL param ────────────────────────────────
 function getOwner() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('owner') || 'Your SecureCheck';
+  return params.get('owner') || 'Your RiskPulse';
 }
 
 function getToken() {
@@ -351,15 +351,15 @@ function registerDevice() {
     checkedInVia: 'link',
   };
 
-  // Save into SecureCheck localStorage
+  // Save into RiskPulse localStorage
   setTimeout(() => {
     try {
-      const raw = localStorage.getItem('securecheck');
+      const raw = localStorage.getItem('riskpulse');
       const state = raw ? JSON.parse(raw) : { devices: [], breaches: [], settings: {} };
       // Remove duplicate by name
       state.devices = state.devices.filter(d => d.name !== name);
       state.devices.push(device);
-      localStorage.setItem('securecheck', JSON.stringify(state));
+      localStorage.setItem('riskpulse', JSON.stringify(state));
     } catch(e) {}
 
     // Show success
@@ -369,7 +369,7 @@ function registerDevice() {
     document.getElementById('successMsg').innerHTML =
       `<strong style="color:var(--text)">${name}</strong> has been registered.<br><br>` +
       `OS: <span style="color:var(--accent)">${info.os}</span><br>` +
-      `It will appear in your SecureCheck dashboard.`;
+      `It will appear in your RiskPulse dashboard.`;
   }, 800);
 }
 </script>

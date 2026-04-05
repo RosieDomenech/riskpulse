@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="SecureCheck">
+  <meta name="apple-mobile-web-app-title" content="RiskPulse">
   <meta name="theme-color" content="#0a0a0f">
-  <title>SecureCheck — Personal Security Dashboard</title>
+  <title>RiskPulse — Personal Security Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -571,7 +571,7 @@
   <div class="header">
     <div class="logo">
       <div class="logo-icon">🛡️</div>
-      <div class="logo-text">SecureCheck</div>
+      <div class="logo-text">RiskPulse</div>
     </div>
     <div class="header-time" id="headerTime"></div>
   </div>
@@ -755,7 +755,7 @@
       </div>
 
       <div style="text-align:center;padding:24px;color:#333350;font-size:11px;font-family:var(--mono)">
-        SecureCheck v1.0.0 · Built by Rosie Domenech<br>
+        RiskPulse v1.0.0 · Built by Rosie Domenech<br>
         Data stored locally on your device
       </div>
     </div>
@@ -793,12 +793,12 @@ let state = {
 
 // ── Persistence ───────────────────────────────────────────────
 function save() {
-  localStorage.setItem('securecheck', JSON.stringify(state));
+  localStorage.setItem('riskpulse', JSON.stringify(state));
 }
 
 function load() {
   try {
-    const raw = localStorage.getItem('securecheck');
+    const raw = localStorage.getItem('riskpulse');
     if (raw) state = JSON.parse(raw);
   } catch(e) {}
 }
@@ -1110,7 +1110,7 @@ async function checkBreach() {
       {
         headers: {
           'hibp-api-key': 'YOUR_HIBP_KEY', // User needs to add their key
-          'user-agent': 'SecureCheck-PWA'
+          'user-agent': 'RiskPulse-PWA'
         }
       }
     );
@@ -1241,7 +1241,7 @@ function exportData() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'securecheck-export.json';
+  a.download = 'riskpulse-export.json';
   a.click();
 }
 
@@ -1258,7 +1258,7 @@ function clearData() {
 // ── Share Link ───────────────────────────────────────────────
 function getShareUrl() {
   const base = window.location.origin + window.location.pathname.replace('index.html', '');
-  const owner = encodeURIComponent('SecureCheck');
+  const owner = encodeURIComponent('RiskPulse');
   return base + 'checkin.html?owner=' + owner;
 }
 
@@ -1300,7 +1300,7 @@ function nativeShare() {
   const url = getShareUrl();
   if (navigator.share) {
     navigator.share({
-      title: 'Register your device with SecureCheck',
+      title: 'Register your device with RiskPulse',
       text: 'Tap this link to add your device to my security dashboard — it auto-detects your OS!',
       url: url,
     }).catch(() => {});

@@ -1,6 +1,6 @@
 {
-  "name": "SecureCheck",
-  "short_name": "SecureCheck",
+  "name": "RiskPulse",
+  "short_name": "RiskPulse",
   "description": "Personal Security Posture Dashboard",
   "start_url": "/",
   "display": "standalone",
