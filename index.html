@@ -636,12 +636,35 @@
 
   </div>
 
+  <!-- Share Link Modal -->
+  <div id="shareModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;align-items:flex-end;justify-content:center;padding:16px">
+    <div style="background:#12121a;border:1px solid #2a2a3a;border-radius:24px;padding:28px;width:100%;max-width:480px">
+      <div style="font-family:var(--mono);font-size:11px;color:#444460;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">Share Check-In Link</div>
+      <div style="font-size:13px;color:#888899;margin-bottom:16px;line-height:1.6">Send this link to anyone. When they open it on their device, it auto-detects their OS and registers them instantly.</div>
+      <div style="background:#0a0a0f;border:1px solid #2a2a3a;border-radius:12px;padding:14px 16px;font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-all;margin-bottom:16px" id="shareUrl"></div>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <button onclick="copyLink()" style="flex:1;background:var(--accent);color:var(--bg);border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--sans)" id="copyBtn">📋 Copy Link</button>
+        <button onclick="nativeShare()" style="flex:1;background:var(--accent2);color:white;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--sans)">↑ Share</button>
+      </div>
+      <button onclick="closeShareModal()" style="width:100%;background:transparent;border:1px solid #2a2a3a;border-radius:12px;padding:12px;color:#555570;font-size:14px;cursor:pointer;font-family:var(--sans)">Close</button>
+    </div>
+  </div>
+
   <!-- Tab: Devices -->
   <div class="tab-content" id="tab-devices">
     <div class="section" style="padding-top:16px">
       <div class="section-header">
         <div class="section-title">My Devices</div>
         <button class="section-action" onclick="toggleAddDevice()">+ Add</button>
+      </div>
+
+      <!-- Share check-in link banner -->
+      <div style="background:linear-gradient(135deg,rgba(0,136,255,0.12),rgba(0,255,136,0.06));border:1px solid rgba(0,136,255,0.25);border-radius:16px;padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">Invite a Device</div>
+          <div style="font-size:12px;color:#555570;margin-top:2px">Share a link — auto-detects their OS</div>
+        </div>
+        <button onclick="openShareModal()" style="background:var(--accent2);color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);white-space:nowrap">🔗 Share Link</button>
       </div>
 
       <div class="add-device-form" id="addDeviceForm">
@@ -1231,6 +1254,65 @@ function clearData() {
     updateScore();
   }
 }
+
+// ── Share Link ───────────────────────────────────────────────
+function getShareUrl() {
+  const base = window.location.origin + window.location.pathname.replace('index.html', '');
+  const owner = encodeURIComponent('SecureCheck');
+  return base + 'checkin.html?owner=' + owner;
+}
+
+function openShareModal() {
+  const modal = document.getElementById('shareModal');
+  modal.style.display = 'flex';
+  document.getElementById('shareUrl').textContent = getShareUrl();
+}
+
+function closeShareModal() {
+  document.getElementById('shareModal').style.display = 'none';
+}
+
+function copyLink() {
+  const url = getShareUrl();
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied!';
+    btn.style.background = '#00cc66';
+    setTimeout(() => {
+      btn.textContent = '📋 Copy Link';
+      btn.style.background = 'var(--accent)';
+    }, 2000);
+  }).catch(() => {
+    // Fallback for older browsers
+    const el = document.createElement('textarea');
+    el.value = url;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '📋 Copy Link'; }, 2000);
+  });
+}
+
+function nativeShare() {
+  const url = getShareUrl();
+  if (navigator.share) {
+    navigator.share({
+      title: 'Register your device with SecureCheck',
+      text: 'Tap this link to add your device to my security dashboard — it auto-detects your OS!',
+      url: url,
+    }).catch(() => {});
+  } else {
+    copyLink();
+  }
+}
+
+// Close modal when tapping outside
+document.getElementById('shareModal').addEventListener('click', function(e) {
+  if (e.target === this) closeShareModal();
+});
 
 // ── Init ──────────────────────────────────────────────────────
 load();
