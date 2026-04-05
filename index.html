@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SecureCheck">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>SecureCheck — Personal Security Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #12121a;
+      --surface2:  #1a1a26;
+      --border:    #2a2a3a;
+      --accent:    #00ff88;
+      --accent2:   #0088ff;
+      --warn:      #ffaa00;
+      --danger:    #ff3355;
+      --text:      #e8e8f0;
+      --muted:     #6060808;
+      --mono:      'Space Mono', monospace;
+      --sans:      'DM Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 0 100px;
+    }
+
+    /* ── Header ────────────────────────────────────── */
+    .header {
+      padding: 56px 24px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .header-time {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #444460;
+      text-align: right;
+    }
+
+    /* ── Score Card ─────────────────────────────────── */
+    .score-card {
+      margin: 0 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .score-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%);
+    }
+
+    .score-label {
+      font-size: 11px;
+      font-family: var(--mono);
+      letter-spacing: 2px;
+      color: #444460;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .score-main {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .score-number {
+      font-family: var(--mono);
+      font-size: 72px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--accent);
+      text-shadow: 0 0 40px rgba(0,255,136,0.3);
+    }
+
+    .score-number.warn { color: var(--warn); text-shadow: 0 0 40px rgba(255,170,0,0.3); }
+    .score-number.danger { color: var(--danger); text-shadow: 0 0 40px rgba(255,51,85,0.3); }
+
+    .score-meta {
+      padding-bottom: 8px;
+    }
+
+    .score-out-of {
+      font-family: var(--mono);
+      font-size: 14px;
+      color: #444460;
+    }
+
+    .score-status {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .score-status.good { color: var(--accent); }
+    .score-status.warn { color: var(--warn); }
+    .score-status.danger { color: var(--danger); }
+
+    .score-bar-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--accent);
+      transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .score-bar-fill.warn { background: var(--warn); }
+    .score-bar-fill.danger { background: var(--danger); }
+
+    .score-factors {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .factor-chip {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .factor-chip.ok { border-color: rgba(0,255,136,0.3); color: var(--accent); background: rgba(0,255,136,0.05); }
+    .factor-chip.warn { border-color: rgba(255,170,0,0.3); color: var(--warn); background: rgba(255,170,0,0.05); }
+    .factor-chip.bad { border-color: rgba(255,51,85,0.3); color: var(--danger); background: rgba(255,51,85,0.05); }
+
+    /* ── Section ────────────────────────────────────── */
+    .section {
+      margin: 0 16px 16px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #444460;
+      text-transform: uppercase;
+    }
+
+    .section-action {
+      font-size: 12px;
+      color: var(--accent2);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: var(--sans);
+    }
+
+    /* ── Cards ──────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 10px;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .card:hover { border-color: #3a3a50; }
+    .card.alert-card { border-color: rgba(255,51,85,0.3); background: rgba(255,51,85,0.04); }
+    .card.warn-card { border-color: rgba(255,170,0,0.3); background: rgba(255,170,0,0.04); }
+
+    .card-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      background: var(--surface2);
+    }
+
+    .card-info { flex: 1; min-width: 0; }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: #555570;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-ok { background: rgba(0,255,136,0.1); color: var(--accent); border: 1px solid rgba(0,255,136,0.2); }
+    .badge-warn { background: rgba(255,170,0,0.1); color: var(--warn); border: 1px solid rgba(255,170,0,0.2); }
+    .badge-danger { background: rgba(255,51,85,0.1); color: var(--danger); border: 1px solid rgba(255,51,85,0.2); }
+    .badge-muted { background: var(--surface2); color: #444460; border: 1px solid var(--border); }
+
+    /* ── Breach check ───────────────────────────────── */
+    .breach-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .breach-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .breach-input:focus { border-color: var(--accent2); }
+    .breach-input::placeholder { color: #444460; }
+
+    .breach-btn {
+      background: var(--accent2);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      color: white;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .breach-btn:hover { opacity: 0.85; }
+    .breach-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .breach-result {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .breach-result.show { display: block; }
+
+    .breach-result-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #444460;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .breach-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .breach-item:last-child { border-bottom: none; }
+    .breach-name { font-weight: 500; }
+    .breach-date { color: #555570; font-family: var(--mono); font-size: 11px; }
+
+    /* ── Add device form ────────────────────────────── */
+    .add-device-form {
+      background: var(--surface2);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .add-device-form.show { display: block; }
+
+    .form-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .form-input:focus { border-color: var(--accent2); }
+    .form-input::placeholder { color: #333350; }
+
+    .form-select {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      outline: none;
+      appearance: none;
+    }
+
+    .form-btn {
+      width: 100%;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: opacity 0.2s;
+    }
+
+    .form-btn:hover { opacity: 0.85; }
+
+    /* ── Alerts ─────────────────────────────────────── */
+    .alert-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+      display: inline-block;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* ── Nav ────────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: rgba(10,10,15,0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0 28px;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 20px;
+      transition: opacity 0.2s;
+    }
+
+    .nav-btn .icon { font-size: 22px; }
+    .nav-btn .label { font-size: 10px; color: #444460; font-family: var(--mono); }
+    .nav-btn.active .label { color: var(--accent); }
+    .nav-btn.active .icon { filter: drop-shadow(0 0 6px var(--accent)); }
+
+    /* ── Empty state ────────────────────────────────── */
+    .empty {
+      text-align: center;
+      padding: 32px 16px;
+      color: #333350;
+    }
+
+    .empty-icon { font-size: 32px; margin-bottom: 8px; }
+    .empty-text { font-size: 13px; font-family: var(--mono); }
+
+    /* ── Tabs ───────────────────────────────────────── */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── Animations ─────────────────────────────────── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card, .score-card, .section {
+      animation: fadeIn 0.4s ease both;
+    }
+
+    /* ── Loading spinner ────────────────────────────── */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Upgrade Banner ─────────────────────────────── */
+    .upgrade-banner {
+      margin: 0 16px 16px;
+      background: linear-gradient(135deg, rgba(0,136,255,0.15), rgba(0,255,136,0.08));
+      border: 1px solid rgba(0,136,255,0.3);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .upgrade-text { font-size: 13px; color: var(--text); }
+    .upgrade-text strong { color: var(--accent2); }
+
+    .upgrade-btn {
+      background: var(--accent2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: var(--sans);
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🛡️</div>
+      <div class="logo-text">SecureCheck</div>
+    </div>
+    <div class="header-time" id="headerTime"></div>
+  </div>
+
+  <!-- Tab: Dashboard -->
+  <div class="tab-content active" id="tab-dashboard">
+
+    <!-- Score Card -->
+    <div class="score-card">
+      <div class="score-label">SECURITY POSTURE</div>
+      <div class="score-main">
+        <div class="score-number" id="scoreNumber">--</div>
+        <div class="score-meta">
+          <div class="score-out-of">/ 100</div>
+          <div class="score-status" id="scoreStatus">Calculating...</div>
+        </div>
+      </div>
+      <div class="score-bar-track">
+        <div class="score-bar-fill" id="scoreBar" style="width:0%"></div>
+      </div>
+      <div class="score-factors" id="scoreFactors"></div>
+    </div>
+
+    <!-- Active Alerts -->
+    <div class="section" id="alertsSection" style="display:none">
+      <div class="section-header">
+        <div class="section-title"><span class="alert-dot"></span>Active Alerts</div>
+      </div>
+      <div id="alertsList"></div>
+    </div>
+
+    <!-- Upgrade Banner -->
+    <div class="upgrade-banner">
+      <div class="upgrade-text"><strong>Pro:</strong> Unlimited devices + push alerts</div>
+      <button class="upgrade-btn">$4.99/mo</button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Overview</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="card" style="cursor:default">
+          <div style="font-size:28px;font-family:var(--mono);font-weight:700;color:var(--accent2)" id="statDevices">0</div>
+          <div style="font-size:12px;color:#555570;margin-top:4px">Devices tracked</div>
+        </div>
+        <div class="card" style="cursor:default">
+          <div style="font-size:28px;font-family:var(--mono);font-weight:700;color:var(--danger)" id="statBreaches">0</div>
+          <div style="font-size:12px;color:#555570;margin-top:4px">Known breaches</div>
+        </div>
+        <div class="card" style="cursor:default">
+          <div style="font-size:28px;font-family:var(--mono);font-weight:700;color:var(--warn)" id="statOutdated">0</div>
+          <div style="font-size:12px;color:#555570;margin-top:4px">Outdated OS</div>
+        </div>
+        <div class="card" style="cursor:default">
+          <div style="font-size:28px;font-family:var(--mono);font-weight:700;color:var(--accent)" id="statEmails">0</div>
+          <div style="font-size:12px;color:#555570;margin-top:4px">Emails checked</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tab: Devices -->
+  <div class="tab-content" id="tab-devices">
+    <div class="section" style="padding-top:16px">
+      <div class="section-header">
+        <div class="section-title">My Devices</div>
+        <button class="section-action" onclick="toggleAddDevice()">+ Add</button>
+      </div>
+
+      <div class="add-device-form" id="addDeviceForm">
+        <div class="form-row">
+          <input class="form-input" id="deviceName" placeholder="Device name (e.g. MacBook Pro)" />
+        </div>
+        <div class="form-row">
+          <select class="form-select" id="deviceType">
+            <option value="💻">💻 Laptop</option>
+            <option value="🖥️">🖥️ Desktop</option>
+            <option value="📱">📱 iPhone</option>
+            <option value="📱">📱 Android</option>
+            <option value="🖨️">🖨️ Printer</option>
+            <option value="📡">📡 Router</option>
+            <option value="⌚">⌚ Wearable</option>
+            <option value="🔌">🔌 Other</option>
+          </select>
+          <input class="form-input" id="deviceOS" placeholder="OS version (e.g. iOS 17.4)" />
+        </div>
+        <button class="form-btn" onclick="addDevice()">Add Device</button>
+      </div>
+
+      <div id="devicesList"></div>
+    </div>
+  </div>
+
+  <!-- Tab: Breaches -->
+  <div class="tab-content" id="tab-breaches">
+    <div class="section" style="padding-top:16px">
+      <div class="section-header">
+        <div class="section-title">Account Exposure</div>
+      </div>
+
+      <div class="breach-input-row">
+        <input class="breach-input" id="emailInput" type="email" placeholder="Enter email to check..." />
+        <button class="breach-btn" id="checkBtn" onclick="checkBreach()">Check</button>
+      </div>
+
+      <div class="breach-result" id="breachResult"></div>
+
+      <div id="breachHistory"></div>
+    </div>
+  </div>
+
+  <!-- Tab: Settings -->
+  <div class="tab-content" id="tab-settings">
+    <div class="section" style="padding-top:16px">
+      <div class="section-header">
+        <div class="section-title">Settings</div>
+      </div>
+
+      <div class="card" style="cursor:default">
+        <div style="font-size:13px;color:#555570;margin-bottom:12px;font-family:var(--mono);letter-spacing:1px">ALERT THRESHOLDS</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div>
+            <div style="font-size:14px;font-weight:500">Device inactive after</div>
+            <div style="font-size:12px;color:#555570">Flag device as not seen</div>
+          </div>
+          <select class="form-select" style="width:auto" id="inactiveDays" onchange="saveSettings()">
+            <option value="3">3 days</option>
+            <option value="7" selected>7 days</option>
+            <option value="14">14 days</option>
+            <option value="30">30 days</option>
+          </select>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:14px;font-weight:500">Score alert below</div>
+            <div style="font-size:12px;color:#555570">Notify when score drops</div>
+          </div>
+          <select class="form-select" style="width:auto" id="scoreAlert" onchange="saveSettings()">
+            <option value="50">50</option>
+            <option value="60">60</option>
+            <option value="70" selected>70</option>
+            <option value="80">80</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card" style="cursor:default;margin-top:10px">
+        <div style="font-size:13px;color:#555570;margin-bottom:12px;font-family:var(--mono);letter-spacing:1px">DATA</div>
+        <button onclick="exportData()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:var(--sans);font-size:14px;cursor:pointer;margin-bottom:8px">
+          Export My Data (JSON)
+        </button>
+        <button onclick="clearData()" style="width:100%;background:rgba(255,51,85,0.1);border:1px solid rgba(255,51,85,0.3);border-radius:10px;padding:12px;color:var(--danger);font-family:var(--sans);font-size:14px;cursor:pointer">
+          Clear All Data
+        </button>
+      </div>
+
+      <div style="text-align:center;padding:24px;color:#333350;font-size:11px;font-family:var(--mono)">
+        SecureCheck v1.0.0 · Built by Rosie Domenech<br>
+        Data stored locally on your device
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchTab('dashboard', this)">
+    <span class="icon">🛡️</span>
+    <span class="label">Dashboard</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('devices', this)">
+    <span class="icon">💻</span>
+    <span class="label">Devices</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('breaches', this)">
+    <span class="icon">🔍</span>
+    <span class="label">Breaches</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('settings', this)">
+    <span class="icon">⚙️</span>
+    <span class="label">Settings</span>
+  </button>
+</nav>
+
+<script>
+// ── State ─────────────────────────────────────────────────────
+let state = {
+  devices: [],
+  breaches: [],
+  settings: { inactiveDays: 7, scoreAlert: 70 },
+};
+
+// ── Persistence ───────────────────────────────────────────────
+function save() {
+  localStorage.setItem('securecheck', JSON.stringify(state));
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('securecheck');
+    if (raw) state = JSON.parse(raw);
+  } catch(e) {}
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Clock ─────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const opts = { weekday:'short', month:'short', day:'numeric' };
+  const d = now.toLocaleDateString('en-US', opts);
+  const t = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  document.getElementById('headerTime').innerHTML = d + '<br>' + t;
+}
+
+// ── Score ─────────────────────────────────────────────────────
+function calcScore() {
+  let score = 100;
+  const factors = [];
+  const now = Date.now();
+  const inactiveDays = state.settings.inactiveDays || 7;
+
+  // Devices
+  if (state.devices.length === 0) {
+    factors.push({ label: 'No devices', status: 'warn' });
+    score -= 10;
+  } else {
+    const inactive = state.devices.filter(d => {
+      const lastSeen = new Date(d.lastSeen).getTime();
+      return (now - lastSeen) > (inactiveDays * 86400000);
+    });
+    if (inactive.length > 0) {
+      score -= inactive.length * 15;
+      factors.push({ label: inactive.length + ' inactive', status: 'bad' });
+    } else {
+      factors.push({ label: 'Devices OK', status: 'ok' });
+    }
+
+    const outdated = state.devices.filter(d => d.outdated);
+    if (outdated.length > 0) {
+      score -= outdated.length * 10;
+      factors.push({ label: outdated.length + ' outdated OS', status: 'bad' });
+    } else if (state.devices.length > 0) {
+      factors.push({ label: 'OS current', status: 'ok' });
+    }
+  }
+
+  // Breaches
+  const totalBreaches = state.breaches.reduce((a, b) => a + (b.count || 0), 0);
+  if (totalBreaches > 0) {
+    score -= Math.min(totalBreaches * 8, 40);
+    factors.push({ label: totalBreaches + ' breach' + (totalBreaches !== 1 ? 'es' : ''), status: 'bad' });
+  } else if (state.breaches.length > 0) {
+    factors.push({ label: 'No breaches', status: 'ok' });
+  }
+
+  score = Math.max(0, Math.min(100, score));
+  return { score, factors };
+}
+
+function updateScore() {
+  const { score, factors } = calcScore();
+  const numEl  = document.getElementById('scoreNumber');
+  const barEl  = document.getElementById('scoreBar');
+  const statEl = document.getElementById('scoreStatus');
+
+  numEl.textContent = score;
+  barEl.style.width = score + '%';
+
+  // Color class
+  numEl.className = 'score-number';
+  barEl.className = 'score-bar-fill';
+  statEl.className = 'score-status';
+
+  if (score >= 80) {
+    statEl.textContent = 'Looking good';
+    statEl.classList.add('good');
+  } else if (score >= 60) {
+    numEl.classList.add('warn');
+    barEl.classList.add('warn');
+    statEl.textContent = 'Needs attention';
+    statEl.classList.add('warn');
+  } else {
+    numEl.classList.add('danger');
+    barEl.classList.add('danger');
+    statEl.textContent = 'At risk';
+    statEl.classList.add('danger');
+  }
+
+  // Factors
+  const facEl = document.getElementById('scoreFactors');
+  facEl.innerHTML = factors.map(f =>
+    `<div class="factor-chip ${f.status}">${f.status === 'ok' ? '✓' : '⚠'} ${f.label}</div>`
+  ).join('');
+
+  // Stats
+  document.getElementById('statDevices').textContent = state.devices.length;
+  document.getElementById('statBreaches').textContent =
+    state.breaches.reduce((a, b) => a + (b.count || 0), 0);
+  document.getElementById('statOutdated').textContent =
+    state.devices.filter(d => d.outdated).length;
+  document.getElementById('statEmails').textContent = state.breaches.length;
+
+  // Alerts
+  updateAlerts();
+}
+
+function updateAlerts() {
+  const alerts = [];
+  const now = Date.now();
+  const inactiveDays = state.settings.inactiveDays || 7;
+
+  state.devices.forEach(d => {
+    const lastSeen = new Date(d.lastSeen).getTime();
+    const days = Math.floor((now - lastSeen) / 86400000);
+    if (days >= inactiveDays) {
+      alerts.push({
+        icon: '👀',
+        title: d.name + ' hasn\'t checked in',
+        sub: 'Last seen ' + days + ' days ago',
+        type: 'alert'
+      });
+    }
+    if (d.outdated) {
+      alerts.push({
+        icon: '⚠️',
+        title: d.name + ' OS is outdated',
+        sub: 'Running ' + d.os,
+        type: 'warn'
+      });
+    }
+  });
+
+  state.breaches.forEach(b => {
+    if (b.count > 0) {
+      alerts.push({
+        icon: '🚨',
+        title: b.email + ' found in breaches',
+        sub: b.count + ' breach' + (b.count !== 1 ? 'es' : '') + ' detected',
+        type: 'alert'
+      });
+    }
+  });
+
+  const sec = document.getElementById('alertsSection');
+  const list = document.getElementById('alertsList');
+
+  if (alerts.length === 0) {
+    sec.style.display = 'none';
+    return;
+  }
+
+  sec.style.display = 'block';
+  list.innerHTML = alerts.map(a => `
+    <div class="card ${a.type === 'alert' ? 'alert-card' : 'warn-card'}">
+      <div class="card-row">
+        <div class="card-left">
+          <div class="card-icon">${a.icon}</div>
+          <div class="card-info">
+            <div class="card-title">${a.title}</div>
+            <div class="card-sub">${a.sub}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Devices ───────────────────────────────────────────────────
+function toggleAddDevice() {
+  const form = document.getElementById('addDeviceForm');
+  form.classList.toggle('show');
+}
+
+function addDevice() {
+  const name = document.getElementById('deviceName').value.trim();
+  const type = document.getElementById('deviceType').value;
+  const os   = document.getElementById('deviceOS').value.trim();
+
+  if (!name) return;
+
+  const device = {
+    id:       Date.now(),
+    name,
+    type,
+    os:       os || 'Unknown',
+    lastSeen: new Date().toISOString(),
+    outdated: false,
+  };
+
+  state.devices.push(device);
+  save();
+  renderDevices();
+  updateScore();
+
+  document.getElementById('deviceName').value = '';
+  document.getElementById('deviceOS').value = '';
+  document.getElementById('addDeviceForm').classList.remove('show');
+}
+
+function checkIn(id) {
+  const d = state.devices.find(x => x.id === id);
+  if (d) {
+    d.lastSeen = new Date().toISOString();
+    save();
+    renderDevices();
+    updateScore();
+  }
+}
+
+function toggleOutdated(id) {
+  const d = state.devices.find(x => x.id === id);
+  if (d) {
+    d.outdated = !d.outdated;
+    save();
+    renderDevices();
+    updateScore();
+  }
+}
+
+function removeDevice(id) {
+  state.devices = state.devices.filter(x => x.id !== id);
+  save();
+  renderDevices();
+  updateScore();
+}
+
+function timeAgo(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1)   return 'just now';
+  if (mins < 60)  return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)   return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  return days + 'd ago';
+}
+
+function renderDevices() {
+  const el = document.getElementById('devicesList');
+  if (state.devices.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">💻</div><div class="empty-text">No devices yet. Add one above.</div></div>`;
+    return;
+  }
+
+  const now = Date.now();
+  const inactiveDays = state.settings.inactiveDays || 7;
+
+  el.innerHTML = state.devices.map(d => {
+    const lastSeen = new Date(d.lastSeen).getTime();
+    const days = (now - lastSeen) / 86400000;
+    const inactive = days >= inactiveDays;
+
+    let badge = `<span class="card-badge badge-ok">Active</span>`;
+    if (inactive) badge = `<span class="card-badge badge-danger">Inactive</span>`;
+    else if (d.outdated) badge = `<span class="card-badge badge-warn">Outdated</span>`;
+
+    return `
+      <div class="card ${inactive ? 'alert-card' : d.outdated ? 'warn-card' : ''}">
+        <div class="card-row">
+          <div class="card-left">
+            <div class="card-icon">${d.type}</div>
+            <div class="card-info">
+              <div class="card-title">${d.name}</div>
+              <div class="card-sub">${d.os} · Last seen ${timeAgo(d.lastSeen)}</div>
+            </div>
+          </div>
+          ${badge}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button onclick="checkIn(${d.id})" style="flex:1;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:8px;padding:7px;color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--sans)">
+            ✓ Check In
+          </button>
+          <button onclick="toggleOutdated(${d.id})" style="flex:1;background:rgba(255,170,0,0.1);border:1px solid rgba(255,170,0,0.2);border-radius:8px;padding:7px;color:var(--warn);font-size:12px;cursor:pointer;font-family:var(--sans)">
+            ${d.outdated ? '✓ Mark Current' : '⚠ Mark Outdated'}
+          </button>
+          <button onclick="removeDevice(${d.id})" style="background:rgba(255,51,85,0.1);border:1px solid rgba(255,51,85,0.2);border-radius:8px;padding:7px 10px;color:var(--danger);font-size:12px;cursor:pointer;font-family:var(--sans)">
+            🗑
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Breach Check ──────────────────────────────────────────────
+async function checkBreach() {
+  const email = document.getElementById('emailInput').value.trim();
+  if (!email || !email.includes('@')) return;
+
+  const btn = document.getElementById('checkBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  const resultEl = document.getElementById('breachResult');
+  resultEl.className = 'breach-result show';
+  resultEl.innerHTML = '<div style="color:#555570;font-size:13px;font-family:var(--mono)">Checking...</div>';
+
+  try {
+    // Use HaveIBeenPwned v3 API
+    const res = await fetch(
+      `https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(email)}?truncateResponse=false`,
+      {
+        headers: {
+          'hibp-api-key': 'YOUR_HIBP_KEY', // User needs to add their key
+          'user-agent': 'SecureCheck-PWA'
+        }
+      }
+    );
+
+    let count = 0;
+    let breachNames = [];
+
+    if (res.status === 200) {
+      const data = await res.json();
+      count = data.length;
+      breachNames = data.slice(0, 5).map(b => ({ name: b.Name, date: b.BreachDate }));
+    } else if (res.status === 404) {
+      // No breaches found — good!
+      count = 0;
+    } else if (res.status === 401) {
+      // No API key — show demo mode
+      showDemoBreaches(email, resultEl, btn);
+      return;
+    }
+
+    renderBreachResult(email, count, breachNames, resultEl);
+    saveBreachResult(email, count);
+
+  } catch(e) {
+    // CORS or network — show demo
+    showDemoBreaches(email, resultEl, btn);
+    return;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Check';
+}
+
+function showDemoBreaches(email, resultEl, btn) {
+  // Demo mode when no API key
+  resultEl.innerHTML = `
+    <div class="breach-result-title">Demo Mode — Add HIBP API Key for live data</div>
+    <div style="font-size:12px;color:#555570;margin-bottom:12px">
+      Get a free key at <a href="https://haveibeenpwned.com/API/Key" target="_blank" style="color:var(--accent2)">haveibeenpwned.com</a>
+    </div>
+    <div class="breach-item">
+      <span class="breach-name">Adobe</span>
+      <span class="breach-date">2013-10-04</span>
+    </div>
+    <div class="breach-item">
+      <span class="breach-name">LinkedIn</span>
+      <span class="breach-date">2012-05-05</span>
+    </div>
+  `;
+  btn.disabled = false;
+  btn.textContent = 'Check';
+}
+
+function renderBreachResult(email, count, breachNames, resultEl) {
+  if (count === 0) {
+    resultEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:24px">✅</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--accent)">${email}</div>
+          <div style="font-size:12px;color:#555570">No breaches found</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  resultEl.innerHTML = `
+    <div class="breach-result-title">⚠ Found in ${count} breach${count !== 1 ? 'es' : ''}</div>
+    ${breachNames.map(b => `
+      <div class="breach-item">
+        <span class="breach-name">${b.name}</span>
+        <span class="breach-date">${b.date}</span>
+      </div>
+    `).join('')}
+    ${count > 5 ? `<div style="font-size:11px;color:#555570;padding-top:8px;font-family:var(--mono)">+${count-5} more breaches</div>` : ''}
+  `;
+}
+
+function saveBreachResult(email, count) {
+  const existing = state.breaches.find(b => b.email === email);
+  if (existing) {
+    existing.count = count;
+    existing.checked = new Date().toISOString();
+  } else {
+    state.breaches.push({ email, count, checked: new Date().toISOString() });
+  }
+  save();
+  updateScore();
+  renderBreachHistory();
+}
+
+function renderBreachHistory() {
+  const el = document.getElementById('breachHistory');
+  if (state.breaches.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">No emails checked yet.</div></div>`;
+    return;
+  }
+
+  el.innerHTML = '<div style="margin-top:16px">' + state.breaches.map(b => `
+    <div class="card ${b.count > 0 ? 'alert-card' : ''}">
+      <div class="card-row">
+        <div class="card-left">
+          <div class="card-icon">${b.count > 0 ? '🚨' : '✅'}</div>
+          <div class="card-info">
+            <div class="card-title">${b.email}</div>
+            <div class="card-sub">Checked ${timeAgo(b.checked)}</div>
+          </div>
+        </div>
+        <span class="card-badge ${b.count > 0 ? 'badge-danger' : 'badge-ok'}">
+          ${b.count > 0 ? b.count + ' breach' + (b.count !== 1 ? 'es' : '') : 'Clean'}
+        </span>
+      </div>
+    </div>
+  `).join('') + '</div>';
+}
+
+// ── Settings ──────────────────────────────────────────────────
+function saveSettings() {
+  state.settings.inactiveDays = parseInt(document.getElementById('inactiveDays').value);
+  state.settings.scoreAlert = parseInt(document.getElementById('scoreAlert').value);
+  save();
+  updateScore();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'securecheck-export.json';
+  a.click();
+}
+
+function clearData() {
+  if (confirm('Clear all data? This cannot be undone.')) {
+    state = { devices: [], breaches: [], settings: { inactiveDays: 7, scoreAlert: 70 } };
+    save();
+    renderDevices();
+    renderBreachHistory();
+    updateScore();
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+load();
+updateClock();
+setInterval(updateClock, 30000);
+renderDevices();
+renderBreachHistory();
+setTimeout(updateScore, 100);
+
+// Restore settings UI
+document.getElementById('inactiveDays').value = state.settings.inactiveDays || 7;
+document.getElementById('scoreAlert').value = state.settings.scoreAlert || 70;
+</script>
+</body>
+</html>
